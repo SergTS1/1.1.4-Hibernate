@@ -1,5 +1,0 @@
-#delete from users;
-insert into users (name, lastName, age) values('Sergey', 'Zak', 34);
-select * from users;
-delete from users where id=24;
-delete from users;
