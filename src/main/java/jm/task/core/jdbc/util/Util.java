@@ -1,51 +1,60 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+
+import javax.imageio.spi.ServiceRegistry;
 import java.sql.*;
+import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
-    private static final String USER_NAME = "root";
-    private static final String PASSWORD = "Qazwsx1651";
-    private static final String URL = "jdbc:mysql://localhost:3306/mysql";
+    private static String url = "jdbc:mysql://localhost:3306/table";
+    private static String username = "root";
+    private static String password = "Qazwsx1651";
 
     public static Connection getConnection() {
         try {
-            return DriverManager.getConnection(URL, USER_NAME, PASSWORD);
+            return DriverManager.getConnection(url, username, password);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
         return null;
     }
 
+    private static  SessionFactory sessionFactory;
 
+    public static  SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            try {
+                Configuration configuration = new Configuration();
 
+                Properties properties = new Properties();
+                properties.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+                properties.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/table?serverTimezone=Europe/Moscow");
+                properties.setProperty("hibernate.connection.username", "root");
+                properties.setProperty("hibernate.connection.password", "Qazwsx1651");
+                properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
+                properties.setProperty("hibernate.show_sql", "true");
+                properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+                //properties.put(Environment.HBM2DDL_AUTO, "create-drop");
+                // properties.setProperty("hibernate.hbm2ddl.auto", "validate");
 
-//    private static Statement statement;
-//    private static Connection connection;
+                configuration.setProperties(properties);
+                configuration.addAnnotatedClass(User.class);
+                StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties()).build();
 
-//    static {
-//        try {
-//            connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//            throw new RuntimeException();
-//        }
-//    }
-//
-//    static {
-//        try {
-//            statement = connection.createStatement();
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//            throw new RuntimeException();
-//        }
-//    }
-
-//    public static Connection getConnection() {
-//        return connection;
-//    }
-//
-//    public static Statement getStatement() {
-//        return statement;
-//    }
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return sessionFactory;
+    }
 }
